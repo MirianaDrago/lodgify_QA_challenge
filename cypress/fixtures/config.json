@@ -1,4 +1,6 @@
 {
   "workspaceName": "Testing",
-  "spaceName": "test"
+  "spaceName": "Test Space",
+  "folderName": "Test Folder",
+  "taskName": "Test Task"
 }
