@@ -4,7 +4,7 @@
   Parameters: Workspace name
   Return: workspace ID
 */
-Cypress.Commands.add('getWorkspaceId', (workspaceName) => {
+Cypress.Commands.add('getWorkspaceIdAPI', (workspaceName) => {
   const apiToken = Cypress.env('api_token');
   
   return cy.request({
@@ -31,7 +31,7 @@ Cypress.Commands.add('getWorkspaceId', (workspaceName) => {
   Parameters: Team/workspace id to create the space under
   Return: nothing, creates alias
 */ 
-Cypress.Commands.add('createSpace', (teamId, spaceName) => {
+Cypress.Commands.add('createSpaceAPI', (teamId, spaceName) => {
   const apiToken = Cypress.env('api_token');
 
   return cy.request({
@@ -68,7 +68,7 @@ Cypress.Commands.add('createSpace', (teamId, spaceName) => {
   Parameters: Space ID
   Return: nothing
 */
-Cypress.Commands.add('deleteSpace', (spaceId) => {
+Cypress.Commands.add('deleteSpaceAPI', (spaceId) => {
   const apiToken = Cypress.env('api_token'); 
 
   cy.request({
@@ -104,7 +104,7 @@ Cypress.Commands.add('login', () => {
   Parameters: workspace ID
   Return: all spaces
 */
-Cypress.Commands.add('getSpaces', (teamId) => {
+Cypress.Commands.add('getSpacesAPI', (teamId) => {
   const apiToken = Cypress.env('api_token'); 
 
   return cy.request({
@@ -127,8 +127,8 @@ Cypress.Commands.add('getSpaces', (teamId) => {
   Parameters: workspace ID & space name
   Return: space ID
 */
-Cypress.Commands.add('getSpaceIdByName', (teamId, spaceName) => {
-  return cy.getSpaces(teamId).then(response => {
+Cypress.Commands.add('getSpaceIdByNameAPI', (teamId, spaceName) => {
+  return cy.getSpacesAPI(teamId).then(response => {
     const spaces = response.spaces;
     const targetSpace = spaces.find(space => space.name === spaceName);
     if (targetSpace) {
@@ -144,7 +144,7 @@ Cypress.Commands.add('getSpaceIdByName', (teamId, spaceName) => {
   Parameters: space ID
   Return: all folders
 */
-Cypress.Commands.add('getFolders', (spaceId) => {
+Cypress.Commands.add('getFoldersAPI', (spaceId) => {
   const apiToken = Cypress.env('api_token');
   return cy.request({
     method: 'GET',
@@ -166,8 +166,8 @@ Cypress.Commands.add('getFolders', (spaceId) => {
   Parameters: space ID & folder name
   Return: folder ID
 */
-Cypress.Commands.add('getFolderIdByName', (spaceId, folderName) => {
-  return cy.getFolders(spaceId).then(folders => {
+Cypress.Commands.add('getFolderIdByNameAPI', (spaceId, folderName) => {
+  return cy.getFoldersAPI(spaceId).then(folders => {
     const targetFolder = folders.folders.find(folder => folder.name === folderName);
     if (targetFolder) {
       return targetFolder.id;
@@ -182,7 +182,7 @@ Cypress.Commands.add('getFolderIdByName', (spaceId, folderName) => {
   Parameters: folder ID
   Return: all lists
 */
-Cypress.Commands.add('getLists', (folderId) => {
+Cypress.Commands.add('getListsAPI', (folderId) => {
   const apiToken = Cypress.env('api_token');
   return cy.request({
     method: 'GET',
@@ -204,8 +204,8 @@ Cypress.Commands.add('getLists', (folderId) => {
   Parameters: folder ID
   Return: list ID
 */
-Cypress.Commands.add('getFirstListId', (folderId) => {
-  return cy.getLists(folderId).then(lists => {
+Cypress.Commands.add('getFirstListIdAPI', (folderId) => {
+  return cy.getListsAPI(folderId).then(lists => {
     const firstList = lists.lists[0];  
     if (firstList) {
       return firstList.id;
@@ -221,7 +221,7 @@ Cypress.Commands.add('getFirstListId', (folderId) => {
   Parameters: list ID
   Return: list of tasks
 */
-Cypress.Commands.add('getTasks', (listId) => {
+Cypress.Commands.add('getTasksAPI', (listId) => {
   const apiToken = Cypress.env('api_token'); 
 
   return cy.request({
@@ -244,8 +244,8 @@ Cypress.Commands.add('getTasks', (listId) => {
   Parameters: list ID & task name
   Return: task object
 */
-Cypress.Commands.add('getTaskByName', (listId, taskName) => {
-  return cy.getTasks(listId).then(tasks => {
+Cypress.Commands.add('getTaskByNameAPI', (listId, taskName) => {
+  return cy.getTasksAPI(listId).then(tasks => {
     const targetTask = tasks.find(task => task.name === taskName);
     if (targetTask) {
       return targetTask; 
@@ -261,11 +261,11 @@ Cypress.Commands.add('getTaskByName', (listId, taskName) => {
   Return: nothing
 */
 Cypress.Commands.add('verifyTaskCreationAPI', (workspaceName, spaceName, folderName, taskName) => {
-  cy.getWorkspaceId(workspaceName).then(teamId => {
-      cy.getSpaceIdByName(teamId, spaceName).then(spaceId => {
-          cy.getFolderIdByName(spaceId, folderName).then(folderId => {
-              cy.getFirstListId(folderId).then(listId => {
-                  cy.getTaskByName(listId, taskName).then(task => {
+  cy.getWorkspaceIdAPI(workspaceName).then(teamId => {
+      cy.getSpaceIdByNameAPI(teamId, spaceName).then(spaceId => {
+          cy.getFolderIdByNameAPI(spaceId, folderName).then(folderId => {
+              cy.getFirstListIdAPI(folderId).then(listId => {
+                  cy.getTaskByNameAPI(listId, taskName).then(task => {
                       expect(task).to.exist;
                       expect(task.name).to.equal(taskName);
                   });
@@ -283,7 +283,7 @@ Cypress.Commands.add('verifyTaskCreationAPI', (workspaceName, spaceName, folderN
 */
 Cypress.Commands.add('selectSpaceUI', (spaceName) => {
   const selector = `[data-test="project-list-bar-item__link__${spaceName}"]`;
-  cy.get(selector).should('be.visible').click();
+  cy.get(selector).should('be.visible').and('contain', spaceName).click();
 });
 
 /* 
@@ -323,4 +323,71 @@ Cypress.Commands.add('createTaskUnderFolderPageUI', (taskName) => {
   cy.get('.cu2-views-bar__create-cu-object-button > .ng-trigger > [data-test="cu2-views-bar__create-menu-view-bar-collapsed"] > .container > [data-test="create-task-menu__new-task-button"]').click();
   cy.get('[data-test="draft-view__title-task"]').click().clear().type(taskName);
   cy.get('[data-test="draft-view__quick-create-create"]').click();
+});
+
+
+/* 
+  Description: creates a task through the API under a certain folder list
+  Parameters: list ID, task name & task description
+  Return: response body
+*/
+Cypress.Commands.add('createTaskAPI', (listId, taskName, taskDescription) => {
+  const apiToken = Cypress.env('api_token');
+
+  return cy.request({
+    method: 'POST',
+    url: `https://api.clickup.com/api/v2/list/${listId}/task`,  
+    headers: {
+      'Authorization': apiToken,
+      'Content-Type': 'application/json'
+    },
+    body: {
+      "name": taskName,
+      "description": taskDescription
+    }
+  }).then(response => {
+    expect(response.status).to.eq(200);  
+    cy.log(`Task "${taskName}" created successfully with ID: ${response.body.id}`);
+    return cy.wrap(response.body); // return the task object
+  });
+});
+
+/* 
+  Description: creates a task inside a folder under a certain space in a workspace
+  Parameters: workspace name, space name, folder name, task name & task description
+  Return: nothing
+*/
+Cypress.Commands.add('createAndVerifyTaskInFolderAPI', (workspaceName, spaceName, folderName, taskNameToCreate, taskDescriptionToCreate) => {
+  cy.getWorkspaceIdAPI(workspaceName).then(teamId => {
+      cy.getSpaceIdByNameAPI(teamId, spaceName).then(spaceId => {
+          cy.getFolderIdByNameAPI(spaceId, folderName).then(folderId => {
+              cy.getFirstListIdAPI(folderId).then(listId => {
+                  cy.createTaskAPI(listId, taskNameToCreate, taskDescriptionToCreate).then(task => {
+                      expect(task.name).to.equal(taskNameToCreate);
+                      expect(task.description).to.equal(taskDescriptionToCreate);
+                  });
+              });
+          });
+      });
+  });
+});
+
+/*
+  Description: select a folder in the UI under a space
+  Parameters: space name & folder name
+  Return: nothing
+*/
+Cypress.Commands.add('selectFolderUI', (spaceName, folderName) => {
+  // navigate to the space and click to expand if necessary
+  cy.selectSpaceUI(spaceName);
+  cy.wait(500); 
+  // click the folder by building its data-test attribute dynamically
+  cy.get(`[data-test="category-row__folder-name__${folderName}"]`).click();
+});
+
+Cypress.Commands.add('selectListInsideFolderUI', (spaceName, folderName, listName) => {
+  cy.selectFolderUI(spaceName, folderName);
+  cy.wait(500); 
+  // click the list by building its data-test attribute dynamically
+  cy.get(`[data-test="subcategory-row__${listName}"]`).click();
 });
