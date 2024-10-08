@@ -2,23 +2,58 @@ import config from '../fixtures/config.json';
 
 describe('Scenario 1: Validate Create Space functionality', () => {
 
-    const spaceName = config.spaceName;        
+    const spaceName = config.spaceName;  
+    const workspaceName = config.workspaceName;   
+    const longSpaceName = 'a'.repeat(100);  // 100 characters long 
+    const extremelyLongSpaceName = 'a'.repeat(1000); // 1000 characters long
+    const invalidSpaceName = ''; // empty name 
 
-    before(() => {
+    const testCases = [
+        { spaceName: spaceName, description: 'normal length' },
+        { spaceName: longSpaceName, description: 'boundary length of 100 characters' },
+        { spaceName: extremelyLongSpaceName, description: 'extreme boundary length of 1000 characters' }
+    ];
+
+    beforeEach(() => {
         // intercept all network requests and disable logging
         cy.intercept('**/*', { log: false }).as('allRequests');
-        cy.getWorkspaceIdAPI(config.workspaceName).as('teamId'); // alias for team ID
-    });
-
-    it('Add new space to a workspace via API and confirm created workspace through UI', () => {
-        cy.get('@teamId').then(teamId => { // retrieve the alias in the it block
-            cy.createSpaceAPI(teamId, spaceName);
-        });
-
+        cy.getWorkspaceIdAPI(workspaceName).as('teamId'); // alias for team ID
         cy.visit('/');
         cy.login();
-
-        cy.get('.sidebar__spaces-text', {timeout: 30000}).should('be.visible'); // make sure the spaces section is visible
-        cy.selectSpaceUI(spaceName);
     });
+
+    testCases.forEach(({ spaceName, description }) => {
+        it(`Add new space to a workspace via API with ${description} and confirm through UI`, () => {
+            cy.get('@teamId').then(teamId => { // retrieve the alias in the it block
+                cy.createSpaceAPI(teamId, spaceName).then((response) => {
+                    expect(response.body.name).to.eq(spaceName);
+                    expect(response.status).to.eq(200);
+                });
+            });
+    
+            cy.get('.sidebar__spaces-text', {timeout: 30000}).should('be.visible'); // make sure the spaces section is visible
+            cy.selectSpaceUI(spaceName); // select the space
+            cy.get(`[data-test="breadcrumb-item__name-${spaceName}"]`).should('be.visible').should('contain.text', spaceName);
+        });
+    });
+
+    it('Attempt to create a space with an empty name', () => {
+        cy.get('@teamId').then(teamId => {
+            cy.createSpaceAPI(teamId, invalidSpaceName).then((response) => {
+                expect(response.status).to.eq(400);  // assert that the status code is 400
+                expect(response.body.err).to.eq('Space name invalid');  // assert the error message
+            });
+        });
+    });
+    
+    it('Attempt to create a space with a duplicate name', () => {    
+        cy.get('@teamId').then(teamId => {
+            // attempt to create the space with the same name again
+            cy.createSpaceAPI(teamId, spaceName).then((response) => {
+                // assert that the status code is 400 
+                expect(response.status).to.eq(400);  
+                expect(response.body.err).to.eq('Space with this name already exists');  
+            });
+        });
+    });    
 });

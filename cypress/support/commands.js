@@ -44,23 +44,13 @@ Cypress.Commands.add('createSpaceAPI', (teamId, spaceName) => {
     body: {
       name: spaceName
     },
-    failOnStatusCode: false  
+    failOnStatusCode: false  // prevent Cypress from failing on non-2xx status codes
   }).then(response => {
-    expect(response.status).to.eq(200);
-    expect(response.body.name).to.eq(spaceName);
-    
-    if (response.status === 200) {
-      cy.log('Space created successfully with ID:', response.body.id);
-      return cy.wrap(response.body.id);  // use cy.wrap to ensure proper chaining
-    } else {
-      cy.log(`Failed to create space. Status code: ${response.status}`);
-      cy.log('Response body:', JSON.stringify(response.body));
-
-      // if creation failed, return null or throw an error
-      throw new Error(`Failed to create space. Status code: ${response.status}`);
-    }
+    cy.log('Response body:', JSON.stringify(response.body));
+    return cy.wrap(response);  // return the full response for further assertions
   });
 });
+
 
 
 /*
@@ -93,8 +83,8 @@ Cypress.Commands.add('deleteSpaceAPI', (spaceId) => {
   Return: nothing
 */
 Cypress.Commands.add('login', () => {
-  cy.get('[data-test="login-email-input"]').click().type(Cypress.env('login_email'));
-  cy.get('[data-test="login-password-input"]').click().type(Cypress.env('login_password'));
+  cy.get('[data-test="login-email-input"]').click().type((Cypress.env('login_email')), {log: false}); 
+  cy.get('[data-test="login-password-input"]').click().type((Cypress.env('login_password')), {log: false}); 
   cy.get('[data-test="login-submit"]').click();
   cy.log('Successfully logged in!');
 })
