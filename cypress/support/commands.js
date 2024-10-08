@@ -25,11 +25,10 @@ Cypress.Commands.add('getWorkspaceIdAPI', (workspaceName) => {
   });
 });
 
-
 /* 
   Description: Create a space 
   Parameters: Team/workspace id to create the space under
-  Return: nothing, creates alias
+  Return: response
 */ 
 Cypress.Commands.add('createSpaceAPI', (teamId, spaceName) => {
   const apiToken = Cypress.env('api_token');
@@ -50,8 +49,6 @@ Cypress.Commands.add('createSpaceAPI', (teamId, spaceName) => {
     return cy.wrap(response);  // return the full response for further assertions
   });
 });
-
-
 
 /*
   Description: Delete space 
@@ -311,7 +308,11 @@ Cypress.Commands.add('createFolderUnderSpacePageUI', (folderName) => {
 */
 Cypress.Commands.add('createTaskUnderFolderPageUI', (taskName) => {
   cy.get('.cu2-views-bar__create-cu-object-button > .ng-trigger > [data-test="cu2-views-bar__create-menu-view-bar-collapsed"] > .container > [data-test="create-task-menu__new-task-button"]').click();
-  cy.get('[data-test="draft-view__title-task"]').click().clear().type(taskName);
+  
+  if (taskName) { // for negative test
+    cy.get('[data-test="draft-view__title-task"]').click().clear().type(taskName);
+  }
+
   cy.get('[data-test="draft-view__quick-create-create"]').click();
 });
 
@@ -334,11 +335,10 @@ Cypress.Commands.add('createTaskAPI', (listId, taskName, taskDescription) => {
     body: {
       "name": taskName,
       "description": taskDescription
-    }
+    },
+    failOnStatusCode: false
   }).then(response => {
-    expect(response.status).to.eq(200);  
-    cy.log(`Task "${taskName}" created successfully with ID: ${response.body.id}`);
-    return cy.wrap(response.body); // return the task object
+    return cy.wrap(response); // return the task object
   });
 });
 
@@ -347,14 +347,14 @@ Cypress.Commands.add('createTaskAPI', (listId, taskName, taskDescription) => {
   Parameters: workspace name, space name, folder name, task name & task description
   Return: nothing
 */
-Cypress.Commands.add('createAndVerifyTaskInFolderAPI', (workspaceName, spaceName, folderName, taskNameToCreate, taskDescriptionToCreate) => {
+Cypress.Commands.add('createTaskInFolderAPI', (workspaceName, spaceName, folderName, taskNameToCreate, taskDescriptionToCreate) => {
   cy.getWorkspaceIdAPI(workspaceName).then(teamId => {
       cy.getSpaceIdByNameAPI(teamId, spaceName).then(spaceId => {
           cy.getFolderIdByNameAPI(spaceId, folderName).then(folderId => {
+            // for now using the first list since thats the default list created...
               cy.getFirstListIdAPI(folderId).then(listId => {
-                  cy.createTaskAPI(listId, taskNameToCreate, taskDescriptionToCreate).then(task => {
-                      expect(task.name).to.equal(taskNameToCreate);
-                      expect(task.description).to.equal(taskDescriptionToCreate);
+                  cy.createTaskAPI(listId, taskNameToCreate, taskDescriptionToCreate).then(response => {
+                    return cy.wrap(response);
                   });
               });
           });
@@ -380,4 +380,36 @@ Cypress.Commands.add('selectListInsideFolderUI', (spaceName, folderName, listNam
   cy.wait(500); 
   // click the list by building its data-test attribute dynamically
   cy.get(`[data-test="subcategory-row__${listName}"]`).click();
+});
+
+/*
+  Description: delete folder 
+  Parameters: folder id
+  Return: response
+*/
+Cypress.Commands.add('deleteFolderAPI', (folderId) => {
+  const apiToken = Cypress.env('api_token'); 
+
+  return cy.request({
+    method: 'DELETE',
+    url: `https://api.clickup.com/api/v2/folder/${folderId}`,  
+    headers: {
+      'Authorization': apiToken,  
+    }
+  }).then((response) => {
+    cy.log('Response:', JSON.stringify(response.body));
+    return cy.wrap(response);
+  });
+});
+
+Cypress.Commands.add('deleteFolderUnderSpaceAPI', (workspaceName, spaceName, folderName) => {
+  cy.getWorkspaceIdAPI(workspaceName).then(teamId => {
+    cy.getSpaceIdByNameAPI(teamId, spaceName).then(spaceId => {
+        cy.getFolderIdByNameAPI(spaceId, folderName).then(folderId => {
+            cy.deleteFolderAPI(folderId).then((response) => {
+              return cy.wrap(response);
+            });
+        });
+    });
+  });
 });

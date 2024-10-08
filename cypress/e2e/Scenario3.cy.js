@@ -12,19 +12,27 @@ describe('Scenario 3: Validate Create Task via API', () => {
     before(() => {
         // intercept all network requests and disable logging
         cy.intercept('**/*', { log: false }).as('allRequests');
+        cy.visit('/');
+        cy.login();
     });
 
     it('Add new task via API and confirm task through UI', () => {
-
         // using the previous workspace & folder created in scenario 2
-        cy.createAndVerifyTaskInFolderAPI(workspaceName, spaceName, folderName, taskNameToCreate, taskDescriptionToCreate);
-
-        cy.visit('/');
-        cy.login();
+        cy.createTaskInFolderAPI(workspaceName, spaceName, folderName, taskNameToCreate, taskDescriptionToCreate).then((response) => {
+            expect(response.body.name).to.equal(taskNameToCreate);
+            expect(response.body.description).to.equal(taskDescriptionToCreate);
+        });
 
         cy.get('.sidebar__spaces-text', {timeout: 30000}).should('be.visible'); // makes sure the spaces section is visible
         cy.selectListInsideFolderUI(spaceName, folderName, listName); // select list to go into under specific folder
         cy.get(`[data-test="task-row-main__${taskNameToCreate}"]`).should('contain.text', taskNameToCreate).should('be.visible');
+    });
+
+    it('Attempt to create a task with an empty name via API', () => {
+        cy.createTaskInFolderAPI(workspaceName, spaceName, folderName, '', taskDescriptionToCreate).then((response) => {
+            expect(response.status).to.eq(400); // expect failure due to invalid task name
+            expect(response.body.err).to.eq('Task name invalid');
+        });
     });
 
     after(() => {
