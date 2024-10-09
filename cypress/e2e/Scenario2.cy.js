@@ -28,7 +28,9 @@ describe('Scenario 2: Validate task creation', () => {
             cy.get('.sidebar__spaces-text', {timeout: 30000}).should('be.visible'); // makes sure the spaces section is visible
             cy.selectSpaceUI(spaceName); // select space want to go into
             cy.createFolderUnderSpacePageUI(folderName); // create the folder under space selected previously...
+            cy.screenshot('folder-page');
             cy.createTaskUnderFolderPageUI(taskName); // create task under folder created previously...
+            cy.screenshot(`task-creation-${description}`); // screenshot to verify task creation
             cy.verifyTaskCreationAPI(workspaceName, spaceName, folderName, taskName); // verify through API that task was created
         });
     });
@@ -41,6 +43,7 @@ describe('Scenario 2: Validate task creation', () => {
         cy.get('[data-pendo="quick-create-task-enter-task-name-error"]')
         .should('be.visible')
         .and('contain.text', 'Enter Task Name');
+        cy.screenshot('empty-task-name-error-message');
     });
 
     after(() => {

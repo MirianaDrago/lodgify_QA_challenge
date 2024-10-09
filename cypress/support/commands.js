@@ -18,7 +18,7 @@ Cypress.Commands.add('getWorkspaceIdAPI', (workspaceName) => {
     const teams = response.body.teams;
     const matchedTeam = teams.find(team => team.name === workspaceName);
     if (matchedTeam) {
-        return matchedTeam.id;  
+        return cy.wrap(matchedTeam.id);  
     } else {
         throw new Error('Workspace not found');
     }
@@ -291,8 +291,9 @@ Cypress.Commands.add('createFolderUnderSpacePageUI', (folderName) => {
 
     // create folder button should be visible...
     cy.wrap($el)
-      .find('cu-card-actions-portal .card-actions-button')
-      .should('exist').invoke('show').should('be.visible').click({ force: true });
+    .find('cu-card-actions-portal .card-actions-button', { timeout: 10000 }) 
+    .should('exist').invoke('show').should('be.visible').click({ force: true });
+
 
     // create folder name under the space youre into when you select space...
     cy.get('[data-test="create-category__form-input"]').click().type(folderName);

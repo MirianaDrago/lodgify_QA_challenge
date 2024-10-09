@@ -25,6 +25,7 @@ describe('Scenario 3: Validate Create Task via API', () => {
 
         cy.get('.sidebar__spaces-text', {timeout: 30000}).should('be.visible'); // makes sure the spaces section is visible
         cy.selectListInsideFolderUI(spaceName, folderName, listName); // select list to go into under specific folder
+        cy.screenshot('show-correct-list');
         cy.get(`[data-test="task-row-main__${taskNameToCreate}"]`).should('contain.text', taskNameToCreate).should('be.visible');
     });
 
