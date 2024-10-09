@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project contains automated tests for the Lodgify application, designed to validate various functionalities through Cypress. These instructions will guide you on how to set up and run the tests.
+This project contains automated tests for the Clickup application, designed to validate various functionalities through Cypress. These instructions will guide you on how to set up and run the tests.
 
 ## Prerequisites
 
