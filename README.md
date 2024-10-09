@@ -40,9 +40,10 @@ cd lodgify_QA_challenge
 npm install
 ```
 
-### Create a Cypress.env.json where to store credentials
+### Create a Cypress.env.json where to store credentials under lodgify_QA_challenge/
 
-I am supplying the email & password as I have used a temporary mail for testing
+This is used to store credentials, please create this under lodgify_QA_challenge/.
+I am supplying the email & password as I have used a temporary mail for testing:
 
 ```
 {
