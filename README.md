@@ -40,6 +40,18 @@ cd lodgify_QA_challenge
 npm install
 ```
 
+### Create a Cypress.env.json where to store credentials
+
+I am supplying the email & password as I have used a temporary mail for testing
+
+```
+{
+  "login_email": "jacib55341@adambra.com",
+  "login_password": "SafePassword123",
+  "api_token":"pk_152412676_4OXOFZWE8PXHTIP80PPC7AIWMKLSSQ57"
+}
+```
+
 ### Run Cypress in Chrome browser with mochawesome reporter
 
 ```
