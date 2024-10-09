@@ -8,7 +8,7 @@ This project contains automated tests for the Lodgify application, designed to v
 
 Before you begin, ensure you have met the following requirements:
 
-### Node.js and npm
+ - Node.js and npm
 
 Cypress is a Node.js application, and using it to run tests requires Node.js and npm (Node Package Manager). Ensure you have Node.js and npm installed — npm is included with the Node.js installation.
 
@@ -16,9 +16,10 @@ Cypress is a Node.js application, and using it to run tests requires Node.js and
 
 To check if you have Node.js and npm installed, run the following commands in your terminal:
 
-
+```
 node -v  # Checks the installed version of Node.js
 npm -v   # Checks the installed version of npm
+```
 
 ## Getting Started
 
@@ -28,13 +29,19 @@ These instructions will get your copy of the project up and running on your loca
 
 Start by cloning the repository to your local machine:
 
+```
 git clone https://github.com/MirianaDrago/lodgify_QA_challenge.git
 cd lodgify_QA_challenge
+```
 
 ### Install dependencies
 
+```
 npm install
+```
 
 ### Run Cypress in Chrome browser with mochawesome reporter
 
+```
 npx cypress run --browser chrome --reporter mochawesome
+```
